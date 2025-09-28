@@ -5,7 +5,46 @@ Spec: `specs/001-description-baseline-specification/spec.md`
 
 Notes: Tasks follow TDD-first ordering. [P] denotes tasks that can run in parallel (different files/services).
 
-T001 [ ] Setup: Repository skeleton and dev environment
+## Owners & Estimates
+
+The table below assigns a primary owner (team or role) and a rough implementation estimate for each task. Estimates are intentionally coarse (days). When assigning in the real project, replace the owner with a GitHub username or team and refine estimates.
+
+- T001 — Owner: devops / infra — Estimate: 1d
+- T002 — Owner: devops / infra — Estimate: 1d
+- T003 — Owner: backend — Estimate: 2d
+- T004 — Owner: backend — Estimate: 2d
+- T005 — Owner: backend (Jen) — Estimate: 1d
+- T006 — Owner: backend — Estimate: 1d
+- T007 — Owner: backend — Estimate: 3d
+- T008 — Owner: backend / API — Estimate: 2d
+- T009 — Owner: backend / devices — Estimate: 2d
+- T010 — Owner: backend — Estimate: 2d
+- T011 — Owner: backend — Estimate: 5d
+- T012 — Owner: backend / devices — Estimate: 3d
+- T013 — Owner: payments — Estimate: 3d
+- T014 — Owner: security / compliance — Estimate: 2d
+- T015 — Owner: backend / telemetry — Estimate: 2d
+- T016 — Owner: CI / devops — Estimate: 2d
+- T017 — Owner: docs / eng — Estimate: 1d
+- T018 — Owner: ops — Estimate: 2d
+- T019 — Owner: kiosk — Estimate: 3d
+- T020 — Owner: watchdog — Estimate: 2d
+- T021 — Owner: QA / test-engineering — Estimate: 1d
+- T022 — Owner: backend / data — Estimate: 2d
+- T023 — Owner: backend / security — Estimate: 2d
+- T024 — Owner: security / infra — Estimate: 3d
+- T025 — Owner: security / auth — Estimate: 2d
+- T026 — Owner: perf / qa — Estimate: 3d
+- T027 — Owner: backend / gamification — Estimate: 3d
+- T028 — Owner: backend / console — Estimate: 2d
+- T029 — Owner: marketplace / infra — Estimate: 3d
+
+Notes:
+- Replace owner placeholders with real GitHub usernames or team names when creating issues/PRs.
+- Use the estimates as planning input; break large tasks (>=3d) into subtasks in the sprint board.
+- Mark a task done by checking the left box (e.g., T001 [x]).
+
+T001 [x] Setup: Repository skeleton and dev environment
  - Outcome: Monorepo layout with backend/, frontend/, infra/ and toolchain files.
  - Steps:
 	 1. Create `backend/` and `frontend/` directories and minimal README.md in each.
@@ -15,6 +54,8 @@ T001 [ ] Setup: Repository skeleton and dev environment
  - Files changed/created: `backend/package.json`, `frontend/package.json`, `docker-compose.yml`, `backend/README.md`, `frontend/README.md`
  - Dependencies: None
  - Why first: All subsequent tasks expect the repo structure and dev services.
+
+	Progress: Created `backend/package.json`, `frontend/package.json`, `backend/README.md`, `frontend/README.md`, and `docker-compose.yml` at repo root.
 
 T002 [P] Setup: Linting, formatting, and pre-commit hooks
  - Outcome: ESLint + Prettier + Husky pre-commit hooks for backend and frontend.

@@ -1,0 +1,14 @@
+{
+  "name": "cafemanagement-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "echo \"no-op start\"",
+    "build": "echo \"no-op build\"",
+    "test": "echo \"no-op test\"",
+    "lint": "echo \"no-op lint\""
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
