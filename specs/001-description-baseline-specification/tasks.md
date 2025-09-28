@@ -159,6 +159,106 @@ T018 [ ] Ops: Migrations and rollback validation
 	 2. Document steps in `ops/migrations-playbook.md`.
  - Files: `ops/migrations-playbook.md`
 
+T019 [ ] Kiosk: Implement Windows 11 kiosk client skeleton and lockdown tests
+ - Outcome: `kiosk/` directory with an initial kiosk app template (Electron or .NET) that can run in kiosk mode, developer README, and E2E tests that verify OS lockdown behavior.
+ - Steps:
+	 1. Create `kiosk/README.md` describing build and kiosk-mode startup.
+	 2. Add a minimal app in `kiosk/src/` (Electron recommended for rapid iteration) with configuration that starts fullscreen and disables shell access.
+	 3. Add E2E test `kiosk/tests/e2e/kiosk_lockdown.spec.ts` that verifies the app starts in fullscreen, blocks common shell shortcuts (Alt+Tab), and cannot open Explorer while session active.
+ - Files: `kiosk/README.md`, `kiosk/src/*`, `kiosk/tests/e2e/kiosk_lockdown.spec.ts`
+ - Dependencies: T001 (repo skeleton), T006 (health server available for telemetry during tests)
+ - Notes: This task satisfies the constitution's Kiosk reliability MUST (implement skeleton + tests). NOT parallel.
+
+T020 [ ] Kiosk: Implement Windows Watchdog Service and fault-injection tests
+ - Outcome: Windows Service in `watchdog/windows-service/` that supervises the kiosk app and restarts it on crash, logging restart reasons. Fault-injection test that kills the kiosk process and verifies watchdog restarts it within 5s.
+ - Steps:
+	 1. Implement a minimal Windows Service that starts the kiosk app and monitors heartbeat files or health API.
+	 2. Add `watchdog/tests/watchdog.integration.spec.ts` which simulates a crash and asserts restart within 5s and that restart reason is logged.
+ - Files: `watchdog/windows-service/*`, `watchdog/tests/watchdog.integration.spec.ts`
+ - Dependencies: T019
+ - Notes: Required by constitution (watchdog restart acceptance criteria). NOT parallel.
+
+T021 [ ] Tests: Create required `tests/plan.md` artifact (MANDATORY)
+ - Outcome: `specs/001-description-baseline-specification/tests/plan.md` describing unit, integration, contract, and e2e tests; owners; mapping to requirements and acceptance criteria.
+ - Steps:
+	 1. Draft `tests/plan.md` with a table: requirement key → test type → file/path → owner.
+	 2. Include acceptance criteria mapping (e.g., watchdog restart ≤5s, floorplan latency <2s).
+ - Files: `specs/001-description-baseline-specification/tests/plan.md`
+ - Dependencies: None. This is MANDATORY per spec.
+
+T022 [P] Data: Implement receipts & payments retention and archival job (7y)
+ - Outcome: Scheduled job that archives receipts to object storage and enforces a 7-year retention policy; payments records flagged and archived according to policy.
+ - Steps:
+	 1. Add job `backend/src/jobs/retention/receiptsRetention.ts` that moves receipts older than 7y to cold storage and marks them as archived.
+	 2. Add `ops/receipts-retention-playbook.md` with verification and legal owner sign-off steps.
+ - Files: `backend/src/jobs/retention/receiptsRetention.ts`, `ops/receipts-retention-playbook.md`
+ - Dependencies: T013 (payments service), T018 (migrations validated)
+
+T023 [P] Data: Implement audit log retention & secure archive (2y)
+ - Outcome: Audit logs pipeline that enforces 2-year retention, encrypts/archives old logs, and allows secure export for compliance.
+ - Steps:
+	 1. Add `backend/src/jobs/retention/auditRetention.ts` to purge/ archive audit logs older than 2 years and verify integrity.
+	 2. Document access controls and export/playback procedures in `ops/audit-retention-playbook.md`.
+ - Files: `backend/src/jobs/retention/auditRetention.ts`, `ops/audit-retention-playbook.md`
+ - Dependencies: T014 (security analysis) and legal sign-off
+
+T024 [ ] Security: mTLS provisioning, cert tooling, and API gateway enforcement
+ - Outcome: Certificate provisioning tooling for dev/test, gateway configuration that enforces mTLS for sensitive endpoints, and automated test that verifies TLS client cert requirement.
+ - Steps:
+	 1. Add `infra/certs/generate-dev-certs.sh` or PowerShell equivalent and a short README.
+	 2. Add API gateway config `infra/gateway/mTLS-policy.yaml` showing required mutual TLS for `/devices/*`, `/payments/*` and other sensitive paths.
+	 3. Add test `backend/tests/security/mtls.spec.ts` that confirms failure when client cert not presented and success when presented.
+ - Files: `infra/certs/*`, `infra/gateway/mTLS-policy.yaml`, `backend/tests/security/mtls.spec.ts`
+ - Dependencies: T006 (health/gRPC) and T009 (proto); T014 for security sign-off after implementation
+ - Notes: This implements the constitution's mTLS MUST for sensitive operations. Prefer automation for cert rotation in future.
+
+T025 [ ] Security: RBAC policy implementation and enforcement tests
+ - Outcome: RBAC policy definitions and enforcement hooks in API gateway and services; test suite verifying least-privilege enforcement.
+ - Steps:
+	 1. Add `backend/src/auth/rbac/policies.yaml` with roles admin/manager/support/operator and example policies.
+	 2. Implement middleware `backend/src/auth/rbac/middleware.ts` that enforces policy and logs decision events to audit logs.
+	 3. Add tests `backend/tests/security/rbac.spec.ts` validating role-restricted paths.
+ - Files: `backend/src/auth/rbac/*`, `backend/tests/security/rbac.spec.ts`
+ - Dependencies: T024 (mTLS/gateway changes), T014 (security analysis)
+
+T026 [P] Performance: Floorplan latency perf test & watchdog fault-injection harness
+ - Outcome: Performance tests that measure floorplan update latency under normal and loaded conditions and an automated fault-injection harness for the watchdog restart acceptance test.
+ - Steps:
+	 1. Add test script `backend/tests/perf/floorplan_latency.test.js` that simulates device heartbeats and measures end-to-end UI-update latency (instrument via websocket or pub/sub test harness).
+	 2. Add load script `infra/loadtests/floorplan_load.yml` for k6 or similar to generate device heartbeat load.
+	 3. Add watchdog fault-injection harness `watchdog/tests/fault-injection.sh` to simulate crashes and assert restart within 5s.
+ - Files: `backend/tests/perf/*`, `infra/loadtests/*`, `watchdog/tests/*`
+ - Dependencies: T011 (booking endpoints), T012 (device ingestion), T019/T020 (kiosk/watchdog tests)
+
+T027 [P] Gamification: Implement coins wallet, ledger entries, and leaderboard snapshotting
+ - Outcome: Basic gamification service that supports atomic wallet updates, append-only ledger, and periodic leaderboard snapshots.
+ - Steps:
+	 1. Add migration `backend/migrations/V2__gamification.sql` adding `coins` table (if not present) and ledger JSONB column.
+	 2. Implement service `backend/src/services/gamification/` with credit/debit endpoints and unit tests.
+	 3. Add periodic job `backend/src/jobs/leaderboard_snapshot.ts` to compute leaderboards.
+ - Files: `backend/migrations/V2__gamification.sql`, `backend/src/services/gamification/*`, `backend/tests/unit/gamification.spec.ts`
+ - Dependencies: T003 (initial schema)
+
+T028 [P] Console: QR linking endpoint and E2E QR link test
+ - Outcome: `POST /consoles/link` endpoint to accept QR-link tokens, bind a console session to a user, and tests that validate the flow (including offline reconciliation behavior).
+ - Steps:
+	 1. Add routes/controllers `backend/src/services/console/` and integration tests `backend/tests/integration/console_qr.spec.ts` that simulate QR scan → link → session start.
+	 2. Document extension points for vendor SDKs in the console service README.
+ - Files: `backend/src/services/console/*`, `backend/tests/integration/console_qr.spec.ts`
+ - Dependencies: T007 (booking service) and T011 (booking DB wiring)
+
+T029 [P] Marketplace: Prototype signed package registry and sandboxing check
+ - Outcome: Minimal registry service that accepts signed plugin metadata, verifies signatures, and offers a sandbox runtime for testing plugins.
+ - Steps:
+	 1. Create `marketplace/registry/` with signature verification code and sample signed package format.
+	 2. Add a minimal sandbox runner `marketplace/sandbox/` that isolates plugin execution (container or process-based) and tests the disable/enable flow.
+	 3. Add integration tests `backend/tests/integration/marketplace.spec.ts` verifying plugin install/uninstall and isolation.
+ - Files: `marketplace/registry/*`, `marketplace/sandbox/*`, `backend/tests/integration/marketplace.spec.ts`
+ - Dependencies: T014 (security analysis), T024 (mTLS & gateway security)
+
+----
+Mapping note: developer/ops tasks (T001, T002, T017, T018) map to constitution principles: Spec-driven (ensures reproducible onboarding), Test-driven (lints/tests), and Transparency (quickstart docs). Consider adding a single-line mapping comment under each dev-op task if desired for reviewers.
+
 ----
 Parallel execution examples and agent commands
 - Tasks that can run in parallel (different files/services): T002, T003, T004, T005, T015, T016
