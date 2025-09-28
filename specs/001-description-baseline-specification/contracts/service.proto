@@ -1,0 +1,9 @@
+syntax = "proto3";
+package cafemgmt;
+
+service Health {
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse) {}
+}
+
+message HealthCheckRequest {}
+message HealthCheckResponse { bool ok = 1; }

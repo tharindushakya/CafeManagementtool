@@ -1,0 +1,175 @@
+# Tasks (Phase 2) — Baseline implementation (generated)
+
+Feature: 001-description-baseline-specification — Gaming Café Management (baseline)
+Spec: `specs/001-description-baseline-specification/spec.md`
+
+Notes: Tasks follow TDD-first ordering. [P] denotes tasks that can run in parallel (different files/services).
+
+T001 [ ] Setup: Repository skeleton and dev environment
+ - Outcome: Monorepo layout with backend/, frontend/, infra/ and toolchain files.
+ - Steps:
+	 1. Create `backend/` and `frontend/` directories and minimal README.md in each.
+	 2. Add `package.json` in `backend/` with scripts: build, test, start, lint (use TypeScript). See plan.md Technical Context.
+	 3. Add `package.json` in `frontend/` with scripts: start, build, test.
+	 4. Add `docker-compose.yml` at repo root to start Postgres + Redis for local dev (refer quickstart.md).
+ - Files changed/created: `backend/package.json`, `frontend/package.json`, `docker-compose.yml`, `backend/README.md`, `frontend/README.md`
+ - Dependencies: None
+ - Why first: All subsequent tasks expect the repo structure and dev services.
+
+T002 [P] Setup: Linting, formatting, and pre-commit hooks
+ - Outcome: ESLint + Prettier + Husky pre-commit hooks for backend and frontend.
+ - Steps:
+	 1. Add ESLint + Prettier configs in `backend/` and `frontend/`.
+	 2. Install Husky and configure a pre-commit hook to run `npm run lint` and `npm test` (fast-check set to lint only initially).
+ - Files: `.eslintrc.json`, `.prettierrc`, `.husky/commit-msg`
+ - Parallel: This task can run in parallel with T001 tasks touching different files.
+
+T003 [P] Initialize Postgres schema & migration tool (data-model driven)
+ - Outcome: Migration setup and initial schema implementing entities from `data-model.md`.
+ - Steps:
+	 1. Choose migration tool (Flyway or node-pg-migrate). Add config in `backend/migrations/`.
+	 2. Add initial SQL migration `V1__initial_schema.sql` creating tables: users, devices, bookings, payments, memberships, coins, events. Include `venue_id UUID NOT NULL` on tenant scoped tables and the fields listed in `data-model.md`.
+	 3. Add simple migration run script in `backend/package.json` (e.g., `npm run migrate`).
+ - Files: `backend/migrations/V1__initial_schema.sql`, `backend/config/migrations.*`
+ - Why parallel: Migration files are independent and can be prepared in parallel to other setup.
+
+T004 [P] Generate TypeScript data models and DB ORM bindings
+ - Outcome: Type definitions and minimal ORM models for each entity (users, devices, bookings, payments, memberships, coins, events).
+ - Steps:
+	 1. Add TypeScript interfaces in `backend/src/models/` matching `data-model.md`.
+	 2. Add simple repository layer (e.g., using node-postgres or pg-promise) with CRUD stubs for each model.
+ - Files: `backend/src/models/*.ts`, `backend/src/repositories/*.ts`
+ - Dependency: T003 creates migrations first; otherwise models can be drafted in parallel but marked as dependent for implementation.
+
+T005 [P] Contract tests: Create failing contract tests for each contract file under `/contracts`
+ - Outcome: One contract test per contract artifact that initially fails (TDD). Marked [P].
+ - Steps:
+	 1. For `contracts/openapi.yaml` create a contract test harness using Dredd or Jest + supertest with OpenAPI schema assertions. Place tests under `backend/tests/contract/openapi.spec.ts`.
+	 2. For `contracts/service.proto` add a small proto-based smoke test (`backend/tests/contract/proto.smoke.ts`) that validates the proto can be loaded and messages serialized/deserialized.
+ - Files: `backend/tests/contract/openapi.spec.ts`, `backend/tests/contract/proto.smoke.ts`
+ - Why first: Tests should exist and fail before implementation (TDD).
+
+T006 [ ] Core: Implement Health endpoints (OpenAPI + gRPC) — minimal server stub
+ - Outcome: Health check REST endpoint and gRPC service that returns OK.
+ - Steps:
+	 1. Implement `GET /health` in `backend/src/services/health` per `contracts/openapi.yaml`.
+	 2. Implement gRPC Health service per `contracts/service.proto` with a `Check` RPC.
+	 3. Add startup scripts to run REST + gRPC servers locally.
+ - Files: `backend/src/services/health/*`, `backend/src/grpc/health_server.ts`
+ - Dependencies: T001, T005 (contract tests will now start to pass once implementation is added).
+
+T007 [ ] Core: Booking service scaffolding and endpoints
+ - Outcome: Booking service with REST endpoints: create/reserve/start/complete/cancel and related business logic skeleton.
+ - Steps:
+	 1. Add `backend/src/services/booking/` with controllers and route definitions matching desired OpenAPI endpoints (to be added to `contracts/openapi.yaml` in next task).
+	 2. Implement idempotent booking creation with `booking_id` and state transitions matching `data-model.md`.
+	 3. Add unit tests stubs under `backend/tests/unit/booking.spec.ts`.
+ - Files: `backend/src/services/booking/*`, `backend/tests/unit/booking.spec.ts`
+ - Dependencies: T003 (DB schema), T004 (models), T005 (contract tests for booking endpoints once added).
+
+T008 [ ] Contracts: Expand `contracts/openapi.yaml` with booking, device, and payments endpoints (MVP)
+ - Outcome: Full OpenAPI endpoints for booking lifecycle, device heartbeat/status, payment-intent creation, and webhook receiver for Stripe events.
+ - Steps:
+	 1. Add paths for `/bookings` (POST, GET), `/bookings/{id}/start`, `/bookings/{id}/complete`, `/devices/{id}/heartbeat`, `/payments/create-intent`, `/webhooks/stripe`.
+	 2. Define request/response schemas using shared components (Booking, Device, Payment, Error).
+	 3. Commit file to `specs/001-description-baseline-specification/contracts/openapi.yaml`.
+ - Files: `specs/001-description-baseline-specification/contracts/openapi.yaml` (updated)
+ - Dependencies: T006 (health) and T007 (booking) will implement endpoints to match these contracts.
+
+T009 [ ] Contracts: Expand `service.proto` with device control and health messages
+ - Outcome: Protobuf definitions for device heartbeat, control messages, and booking update notifications.
+ - Steps:
+	 1. Extend `service.proto` with messages: `DeviceHeartbeat`, `DeviceControl`, and `BookingUpdate` and service RPCs: `SendControl`, `StreamHeartbeats`.
+	 2. Add comments describing mTLS requirement for device RPCs.
+ - Files: `specs/001-description-baseline-specification/contracts/service.proto` (updated)
+ - Dependencies: T006 (gRPC health) will be extended to implement these RPCs.
+
+T010 [P] Contract tests: Add tests for the expanded OpenAPI endpoints (booking, device, payments)
+ - Outcome: Contract tests are present and fail until implementation is added.
+ - Steps:
+	 1. Add test files under `backend/tests/contract/booking.spec.ts`, `backend/tests/contract/devices.spec.ts`, `backend/tests/contract/payments.spec.ts` each loading `specs/001-description-baseline-specification/contracts/openapi.yaml`.
+	 2. Use a test runner (Jest) with a helper that validates responses against the OpenAPI schema.
+ - Files: `backend/tests/contract/*.spec.ts`
+ - Parallel: All contract tests are [P] and can run together.
+
+T011 [ ] Core: Implement Booking endpoints and DB wiring
+ - Outcome: Booking endpoints implemented and integrated with DB migrations/repositories.
+ - Steps:
+	 1. Implement controller logic to create/transition bookings using repository layer (T004).
+	 2. Ensure state transitions are atomic (use DB transactions) and idempotent by request idempotency keys.
+	 3. Add integration tests that use docker-compose to run Postgres and run migrations (see quickstart.md).
+ - Files: `backend/src/services/booking/*`, `backend/tests/integration/booking.integration.spec.ts`
+ - Dependencies: T003, T004, T007, T008, T010.
+
+T012 [ ] Core: Device service — heartbeat ingestion and pub/sub updates
+ - Outcome: Device heartbeat endpoint/service that updates device status and publishes events to Redis pub/sub.
+ - Steps:
+	 1. Implement REST or gRPC ingestion for device heartbeats in `backend/src/services/device`.
+	 2. Update the `devices` table `status` and `last_heartbeat` fields.
+	 3. Publish device status changes to Redis channel `device-status.{venue_id}`.
+ - Files: `backend/src/services/device/*`, `backend/tests/integration/device.integration.spec.ts`
+ - Dependencies: T003, T004, T008, T009.
+
+T013 [ ] Core: Payments service integration (Stripe test-mode)
+ - Outcome: Payments service capable of creating a PaymentIntent, handling webhook events, and marking payments records with `reconcile_status`.
+ - Steps:
+	 1. Implement `POST /payments/create-intent` to call Stripe test API and save a payments record in `payments` table with `status = pending`.
+	 2. Implement `POST /webhooks/stripe` to process events (payment_intent.succeeded, charge.refunded) and update `payments` table accordingly.
+	 3. Add reconcile job that marks `reconcile_status` and retries failed posts.
+ - Files: `backend/src/services/payments/*`, `backend/tests/integration/payments.integration.spec.ts`
+ - Dependencies: T003, T004, T008, T010.
+
+T014 [ ] Security & Compliance tasks (high priority for production)
+ - Outcome: Security checklist and gating tasks for PCI and mTLS readiness.
+ - Steps:
+	 1. Create `security-analysis.md` with mTLS topology, RBAC model, data retention enforcement points, and Stripe PCI scope notes (reference spec clarifications).
+	 2. Add CI check placeholder to require Security Owner sign-off before enabling Stripe Terminal production keys.
+ - Files: `specs/001-description-baseline-specification/security-analysis.md`
+ - Dependencies: Approval from Finance & Security compliance team.
+
+T015 [ ] Telemetry pipeline: collection & retention enforcement
+ - Outcome: Telemetry ingest endpoint + retention enforcement policy (90 days) and storage plan.
+ - Steps:
+	 1. Implement telemetry endpoint for kiosk and backend metrics; persist to object store or time-series DB (choice deferred to research tasks).
+	 2. Add retention job and policy enforcement script that deletes telemetry older than 90 days.
+ - Files: `backend/src/services/telemetry/*`, `infra/telemetry-retention-job`.
+ - Dependencies: T006 (kiosk), T012 (device heartbeats).
+
+T016 [P] Testing infra: Jenkins pipeline skeleton and test runners
+ - Outcome: Jenkinsfile (or pipeline-as-code) that runs lint, unit tests, contract tests, and integration smoke tests.
+ - Steps:
+	 1. Add `Jenkinsfile` at repo root with stages: Checkout, Install, Lint, Unit Tests, Contract Tests, Integration (docker-compose up + smoke tests), Security Scan, Publish artifacts.
+	 2. Configure contract-test stage to run `backend/tests/contract/*.spec.ts` (these should initially fail until implementation).
+ - Files: `Jenkinsfile`, `.jenkins/pipeline-config.yml`
+ - Parallel: Test stages include parallel test runners for unit vs contract tests.
+
+T017 [ ] Polish: Unit tests, docs and developer quickstart
+ - Outcome: Developer-friendly README, test coverage targets, and a working quickstart that brings up services locally.
+ - Steps:
+	 1. Flesh out `specs/001-description-baseline-specification/quickstart.md` with exact docker-compose commands and example env vars.
+	 2. Add unit tests to reach an initial coverage baseline (e.g., 40%).
+	 3. Add `backend/README.md` and `frontend/README.md` with startup steps.
+ - Files: `specs/001-description-baseline-specification/quickstart.md` (updated), `backend/README.md`, `frontend/README.md`, unit test files.
+ - Dependencies: most core features implemented.
+
+T018 [ ] Ops: Migrations and rollback validation
+ - Outcome: Verified migration/rollback process and a playbook for safe DB migrations.
+ - Steps:
+	 1. Run migrations in a disposable DB, verify schema produced, then run rollback or compensating migration ensuring no data loss in backward-compatible changes.
+	 2. Document steps in `ops/migrations-playbook.md`.
+ - Files: `ops/migrations-playbook.md`
+
+----
+Parallel execution examples and agent commands
+- Tasks that can run in parallel (different files/services): T002, T003, T004, T005, T015, T016
+- Example agent commands (for an LLM or automation to pick up tasks):
+	- Run contract tests (OpenAPI): `node ./backend/tests/contract/run-openapi-tests.js --spec specs/001-description-baseline-specification/contracts/openapi.yaml`
+	- Run proto smoke test: `node ./backend/tests/contract/run-proto-smoke.js --proto specs/001-description-baseline-specification/contracts/service.proto`
+	- Run migrations locally: `docker-compose up -d && npm --prefix backend run migrate`
+
+Numbering notes: Tasks begin T001 and are ordered by dependency. Tasks marked [P] can be executed in parallel across different files/services. Sequential tasks that modify the same files are intentionally not marked [P].
+
+If you'd like, I can now:
+- Expand `contracts/openapi.yaml` and `service.proto` (create full booking/device/payments contract definitions).  
+- Create the migration SQL `V1__initial_schema.sql` under `backend/migrations/` and TypeScript model files so the team can start implementing.  
+- Generate the Jenkinsfile and contract-test harness (Dredd + Jest) and commit them to the branch.
