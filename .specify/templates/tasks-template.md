@@ -125,3 +125,15 @@ Task: "Integration test auth in tests/integration/test_auth.py"
 - [ ] Parallel tasks truly independent
 - [ ] Each task specifies exact file path
 - [ ] No task modifies same file as another [P] task
+
+## Constitution Alignment Gate (MANDATORY)
+- Confirm tasks cover the Constitution-driven requirements where applicable:
+   - Security-first: tasks to add mTLS, RBAC enforcement, and audit logging instrumentation
+   - Spec-driven: task that ensures spec artifacts are present in `/specs/[FEATURE_NAME]/`
+   - Kiosk reliability: tasks for kiosk lockdown, watchdog service, and tamper detection (if client)
+   - Resilience: tasks for offline queueing, idempotency, and reconciliation
+   - Payments & Licensing: tasks for Stripe integration, payment testing, and license workflows
+   - Marketplace: tasks for package signing, sandboxing, and compatibility metadata
+
+Mark any missing constitution-related tasks and create explicit mitigation tasks before marking the
+gate as passed.

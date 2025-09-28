@@ -24,14 +24,8 @@
    → If implementation details found: ERROR "Remove tech details"
 8. Return: SUCCESS (spec ready for planning)
 ```
-
----
-
 ## ⚡ Quick Guidelines
 - ✅ Focus on WHAT users need and WHY
-- ❌ Avoid HOW to implement (no tech stack, APIs, code structure)
-- 👥 Written for business stakeholders, not developers
-
 ### Section Requirements
 - **Mandatory sections**: Must be completed for every feature
 - **Optional sections**: Include only when relevant to the feature
@@ -56,55 +50,62 @@ When creating this spec from a user prompt:
 
 ### Primary User Story
 [Describe the main user journey in plain language]
-
-### Acceptance Scenarios
 1. **Given** [initial state], **When** [action], **Then** [expected outcome]
 2. **Given** [initial state], **When** [action], **Then** [expected outcome]
 
 ### Edge Cases
-- What happens when [boundary condition]?
-- How does system handle [error scenario]?
-
-## Requirements *(mandatory)*
-
-### Functional Requirements
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
 - **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
-- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
 
-*Example of marking unclear requirements:*
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
 ### Key Entities *(include if feature involves data)*
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
-
----
-
-## Review & Acceptance Checklist
 *GATE: Automated checks run during main() execution*
 
-### Content Quality
-- [ ] No implementation details (languages, frameworks, APIs)
-- [ ] Focused on user value and business needs
-- [ ] Written for non-technical stakeholders
-- [ ] All mandatory sections completed
 
 ### Requirement Completeness
 - [ ] No [NEEDS CLARIFICATION] markers remain
 - [ ] Requirements are testable and unambiguous  
-- [ ] Success criteria are measurable
-- [ ] Scope is clearly bounded
-- [ ] Dependencies and assumptions identified
-
----
-
-## Execution Status
 *Updated by main() during processing*
+## Required Artifacts (MANDATORY)
+- OpenAPI (REST) or proto (gRPC) contracts in `/specs/[FEATURE_NAME]/contracts/`
+- Data model: `data-model.md` with entities and migration notes
+- Test plan: list of unit, integration, and contract tests required
+- Security analysis: document mTLS, RBAC, PCI/Stripe implications and data redaction plan
 
+Any spec missing the above artifacts is considered incomplete and MUST not be implemented.
+
+## API Contract
+Provide OpenAPI, proto, or link to `/specs/[FEATURE_NAME]/contracts`.
+
+## Data Model
+Entities, fields, relationships, and migration considerations.
+
+## Security & Compliance
+Document threat model, mTLS usage, RBAC roles, audit logging points, and any PCI scope.
+
+## Tests
+List required tests (unit, contract, integration). Each contract must include at least one
+contract test that will be executed by CI. Provide test file paths or generation instructions.
+
+## Migration Plan
+DB migrations, data corrections, compatibility notes, and rollback steps.
+
+## Rollback Plan
+How to revert code and schema changes safely.
+
+## Acceptance Criteria
+Concrete, testable criteria (pass/fail) for the feature.
+
+## Governance & Sign-off
+Spec MUST include approver(s) and a sign-off line. Security and Payments owners must
+explicitly approve specs that touch audit, payment, or licensing domains.
+
+## Notes
+[Any additional context]
 - [ ] User description parsed
 - [ ] Key concepts extracted
 - [ ] Ambiguities marked

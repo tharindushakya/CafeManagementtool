@@ -47,7 +47,24 @@
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Gates determined based on `.specify/memory/constitution.md`. At a minimum, the plan must
+explicitly address the following items where applicable. If a gate is not applicable, mark it
+`N/A` with a short justification.
+
+- Security-first: Does the design require mTLS, RBAC, PCI/Stripe considerations? Provide
+   brief notes and list sensitive flows that need audit logging or redaction.
+- Spec-driven: Confirm this plan references a spec created from `.specify/templates/spec-template.md`.
+   Include the spec path or PR link.
+- Kiosk reliability (if client software): Describe kiosk lockdown approach and watchdog
+   service design (Windows 11 constraints).
+- Extensibility: Document plugin/marketplace impact, extension points, and sandboxing needs.
+- Test-driven: List required contract/integration tests that will be generated and CI stages.
+- Resilience: Describe offline/queueing and reconciliation strategies for edge/clients.
+- Transparency: List admin monitoring metrics and required OpenAPI/proto artifacts for public
+   documentation.
+
+If any gate is in violation, the plan MUST document a mitigation or justify an approved
+exception in Complexity Tracking.
 
 ## Project Structure
 
