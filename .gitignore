@@ -1,0 +1,16 @@
+# Ignore GitHub folder that may contain workflows or secrets inserted by agents
+# Add or remove entries as appropriate for your project. Review before committing.
+.github/
+
+# Common secret and local files - add more as needed
+# Environment files
+.env
+.env.*
+
+# Credential files
+credentials.json
+*.key
+*.pem
+
+# macOS
+.DS_Store
