@@ -1,12 +1,23 @@
+# Pipeline configuration for Jenkins seed job and maintainers
+# Used by the Job DSL seed job to create the multibranch pipeline.
+
 pipeline:
-  name: baseline-implementation
-  stages:
-    - Checkout
-    - Install
-    - Lint
-    - Unit Tests
-    - Contract Tests
-    - Integration Smoke
-    - Security Scan
-  notes: |
-    This pipeline is a skeleton for local CI run or Jenkins. It runs lint, unit, contract and a placeholder for integration smoke tests.
+  name: CafeManagementTool-baseline
+  description: Multibranch pipeline for the CafeManagementTool baseline implementation (Phase-2)
+  scm:
+    url: https://github.com/tharindushakya/CafeManagementtool.git
+    credentialsId: github-https-creds # update in Jenkins credentials store
+    branchPatterns:
+      - origin/*
+
+defaults:
+  agentLabel: agent-1
+  timeoutMinutes: 60
+
+notes:
+  - The Jenkinsfile at repo root defines stages: Checkout, Install, Lint, Unit Tests, Contract Tests,
+    Integration (docker-compose), Security Scan, and Publish.
+  - Contract tests are executed from `${BACKEND_DIR}/tests/contract` and may fail until implementation is complete.
+  - The default `agentLabel` is `agent-1`. Ensure the Jenkins agent named `agent-1` is provisioned and online.
+  - If tests or integration stages require building or running Docker containers, the agent must have Docker CLI
+    available and access to the Docker socket (`/var/run/docker.sock`) or be able to run Docker-in-Docker.

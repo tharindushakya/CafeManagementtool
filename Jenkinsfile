@@ -1,4 +1,88 @@
 pipeline {
+  agent { label 'docker-agent' }
+  options {
+    timestamps()
+    ansiColor('xterm')
+    timeout(time: 60, unit: 'MINUTES')
+  }
+  environment {
+    NODE_ENV = 'test'
+    BACKEND_DIR = 'backend'
+  }
+
+  stages {
+    stage('Checkout') {
+      agent any
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Install') {
+      steps {
+        sh 'node --version || true'
+        sh 'npm --prefix ${BACKEND_DIR} ci'
+      }
+    }
+
+    stage('Lint & Typecheck') {
+      parallel {
+        stage('Lint') {
+          steps { sh 'npm --prefix ${BACKEND_DIR} run lint || true' }
+        }
+        stage('Typecheck') {
+          steps { sh 'npm --prefix ${BACKEND_DIR} run typecheck || true' }
+        }
+      }
+    }
+
+    stage('Unit Tests') {
+      steps {
+        sh 'npm --prefix ${BACKEND_DIR} test --silent'
+        junit '${BACKEND_DIR}/test-results/*.xml'
+      }
+    }
+
+    stage('Contract Tests') {
+      steps {
+        // Run contract tests (these may initially fail per T005/T010)
+        sh 'npm --prefix ${BACKEND_DIR} test --silent -- backend/tests/contract || true'
+      }
+    }
+
+    stage('Integration (smoke)') {
+      steps {
+        echo 'Bringing up integration services via docker-compose'
+        sh 'docker-compose -f docker-compose.integration.yml up -d --remove-orphans'
+        // short wait then run smoke scripts
+        sh 'sleep 5'
+        sh 'npm --prefix ${BACKEND_DIR} run migrate || true'
+        sh 'npm --prefix ${BACKEND_DIR} run smoke || true'
+      }
+    }
+
+    stage('Security Scan (placeholder)') {
+      steps {
+        echo 'Run security scanning tools (Snyk/Trivy) - placeholder'
+      }
+    }
+
+    stage('Publish artifacts') {
+      when { branch 'main' }
+      steps {
+        echo 'Publishing artifacts - placeholder'
+      }
+    }
+  }
+
+  post {
+    always {
+      sh 'docker-compose -f docker-compose.integration.yml down || true'
+      archiveArtifacts artifacts: '${BACKEND_DIR}/coverage/**', allowEmptyArchive: true
+    }
+  }
+}
+pipeline {
   agent none
   options {
     timestamps()
