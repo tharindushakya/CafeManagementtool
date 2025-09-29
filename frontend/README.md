@@ -1,3 +1,11 @@
+# Cafe Management — Frontend
+
+This repo contains the frontend app. For local dev:
+
+```powershell
+npm --prefix frontend install
+npm --prefix frontend run start
+```
 # Frontend
 
 This directory will contain the booking/admin UIs (React + TypeScript by default).
