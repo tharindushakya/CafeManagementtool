@@ -30,8 +30,6 @@ multibranchPipelineJob('CafeManagementTool-baseline') {
     }
   }
 
-  // periodic indexing (every 1 day) - optional, adjust as needed
-  triggers {
-    periodic(1)
-  }
+  // No periodic trigger configured here. If you want scheduled indexing, add a
+  // proper cron-style trigger or use the multibranch folder trigger via traits.
 }
