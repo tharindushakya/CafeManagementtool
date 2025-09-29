@@ -66,3 +66,37 @@ pipeline {
     }
   }
 }
+pipeline {
+  agent any
+  stages {
+    stage('Info') {
+      steps {
+        echo "Running on ${env.NODE_NAME}"
+        // show basic environment
+        sh 'uname -a || true'
+        sh 'node --version || true'
+      }
+    }
+
+    stage('Install (backend)') {
+      steps {
+        dir('backend') {
+          sh 'npm ci || true'
+        }
+      }
+    }
+
+    stage('Unit tests (backend)') {
+      steps {
+        dir('backend') {
+          sh 'npm test --silent || true'
+        }
+      }
+    }
+  }
+  post {
+    always {
+      echo 'Minimal pipeline finished.'
+    }
+  }
+}
