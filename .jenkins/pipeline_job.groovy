@@ -9,8 +9,9 @@ multibranchPipelineJob('CafeManagementTool-baseline') {
           id('github-origin')
           remote('https://github.com/tharindushakya/CafeManagementtool.git')
           credentialsId('github-https-creds')
-          // include main and master branches; Job DSL expects a space-separated list
-          includes('main master')
+          // By default this source will discover all branches. If you want to limit
+          // discovery to specific branch names (e.g. main, master) we can add a
+          // branch filtering trait — let me know and I can add that in a follow-up.
         }
       }
     }
