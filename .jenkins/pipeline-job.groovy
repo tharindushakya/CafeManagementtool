@@ -5,7 +5,7 @@ pipelineJob('CafeManagementTool-baseline') {
     cpsScm {
       scm {
         git {
-          remote { url('https://example.com/your/repo.git') }
+          remote { url('https://github.com/tharindushakya/CafeManagementtool.git') }
           branches { branch('*/main') }
         }
       }
