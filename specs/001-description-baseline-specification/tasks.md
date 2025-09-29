@@ -57,7 +57,7 @@ T001 [x] Setup: Repository skeleton and dev environment
 
 	Progress: Created `backend/package.json`, `frontend/package.json`, `backend/README.md`, `frontend/README.md`, and `docker-compose.yml` at repo root.
 
-T002 [P] Setup: Linting, formatting, and pre-commit hooks
+T002 [x] Setup: Linting, formatting, and pre-commit hooks
  - Outcome: ESLint + Prettier + Husky pre-commit hooks for backend and frontend.
  - Steps:
 	 1. Add ESLint + Prettier configs in `backend/` and `frontend/`.
@@ -65,7 +65,9 @@ T002 [P] Setup: Linting, formatting, and pre-commit hooks
  - Files: `.eslintrc.json`, `.prettierrc`, `.husky/commit-msg`
  - Parallel: This task can run in parallel with T001 tasks touching different files.
 
-T003 [P] Initialize Postgres schema & migration tool (data-model driven)
+	Progress: Created root `.eslintrc.json`, `.prettierrc`, and `.husky/` hooks (`pre-commit`, `commit-msg`).
+
+T003 [x] Initialize Postgres schema & migration tool (data-model driven)
  - Outcome: Migration setup and initial schema implementing entities from `data-model.md`.
  - Steps:
 	 1. Choose migration tool (Flyway or node-pg-migrate). Add config in `backend/migrations/`.
@@ -74,7 +76,9 @@ T003 [P] Initialize Postgres schema & migration tool (data-model driven)
  - Files: `backend/migrations/V1__initial_schema.sql`, `backend/config/migrations.*`
  - Why parallel: Migration files are independent and can be prepared in parallel to other setup.
 
-T004 [P] Generate TypeScript data models and DB ORM bindings
+	Progress: Added `backend/migrations/V1__initial_schema.sql`, `backend/migrations/README.md`, and `backend/config/migrations.json`.
+
+T004 [x] Generate TypeScript data models and DB ORM bindings
  - Outcome: Type definitions and minimal ORM models for each entity (users, devices, bookings, payments, memberships, coins, events).
  - Steps:
 	 1. Add TypeScript interfaces in `backend/src/models/` matching `data-model.md`.
@@ -82,7 +86,9 @@ T004 [P] Generate TypeScript data models and DB ORM bindings
  - Files: `backend/src/models/*.ts`, `backend/src/repositories/*.ts`
  - Dependency: T003 creates migrations first; otherwise models can be drafted in parallel but marked as dependent for implementation.
 
-T005 [P] Contract tests: Create failing contract tests for each contract file under `/contracts`
+	Progress: Added TypeScript interfaces under `backend/src/models/` and repository stubs under `backend/src/repositories/` (user, booking, device, payment). Added unit test skeleton under `backend/tests/unit/`.
+
+T005 [x] Contract tests: Create failing contract tests for each contract file under `/contracts`
  - Outcome: One contract test per contract artifact that initially fails (TDD). Marked [P].
  - Steps:
 	 1. For `contracts/openapi.yaml` create a contract test harness using Dredd or Jest + supertest with OpenAPI schema assertions. Place tests under `backend/tests/contract/openapi.spec.ts`.
@@ -90,7 +96,9 @@ T005 [P] Contract tests: Create failing contract tests for each contract file un
  - Files: `backend/tests/contract/openapi.spec.ts`, `backend/tests/contract/proto.smoke.ts`
  - Why first: Tests should exist and fail before implementation (TDD).
 
-T006 [ ] Core: Implement Health endpoints (OpenAPI + gRPC) — minimal server stub
+	Progress: Added failing contract test skeletons at `backend/tests/contract/openapi.spec.ts` and `backend/tests/contract/proto.smoke.ts`. These tests intentionally assert expanded contract symbols and will fail until `contracts/openapi.yaml` and `contracts/service.proto` are updated per T008/T009.
+
+T006 [x] Core: Implement Health endpoints (OpenAPI + gRPC) — minimal server stub
  - Outcome: Health check REST endpoint and gRPC service that returns OK.
  - Steps:
 	 1. Implement `GET /health` in `backend/src/services/health` per `contracts/openapi.yaml`.
@@ -99,7 +107,9 @@ T006 [ ] Core: Implement Health endpoints (OpenAPI + gRPC) — minimal server st
  - Files: `backend/src/services/health/*`, `backend/src/grpc/health_server.ts`
  - Dependencies: T001, T005 (contract tests will now start to pass once implementation is added).
 
-T007 [ ] Core: Booking service scaffolding and endpoints
+	Progress: Added REST health router `backend/src/services/health` and gRPC health server stub `backend/src/grpc/health_server.ts`.
+
+T007 [x] Core: Booking service scaffolding and endpoints
  - Outcome: Booking service with REST endpoints: create/reserve/start/complete/cancel and related business logic skeleton.
  - Steps:
 	 1. Add `backend/src/services/booking/` with controllers and route definitions matching desired OpenAPI endpoints (to be added to `contracts/openapi.yaml` in next task).
@@ -108,7 +118,9 @@ T007 [ ] Core: Booking service scaffolding and endpoints
  - Files: `backend/src/services/booking/*`, `backend/tests/unit/booking.spec.ts`
  - Dependencies: T003 (DB schema), T004 (models), T005 (contract tests for booking endpoints once added).
 
-T008 [ ] Contracts: Expand `contracts/openapi.yaml` with booking, device, and payments endpoints (MVP)
+	Progress: Added booking controller, router, an application entry `backend/src/index.ts`, and a unit test `backend/tests/unit/booking.spec.ts` that asserts POST /bookings returns 201.
+
+T008 [x] Contracts: Expand `contracts/openapi.yaml` with booking, device, and payments endpoints (MVP)
  - Outcome: Full OpenAPI endpoints for booking lifecycle, device heartbeat/status, payment-intent creation, and webhook receiver for Stripe events.
  - Steps:
 	 1. Add paths for `/bookings` (POST, GET), `/bookings/{id}/start`, `/bookings/{id}/complete`, `/devices/{id}/heartbeat`, `/payments/create-intent`, `/webhooks/stripe`.
@@ -117,7 +129,9 @@ T008 [ ] Contracts: Expand `contracts/openapi.yaml` with booking, device, and pa
  - Files: `specs/001-description-baseline-specification/contracts/openapi.yaml` (updated)
  - Dependencies: T006 (health) and T007 (booking) will implement endpoints to match these contracts.
 
-T009 [ ] Contracts: Expand `service.proto` with device control and health messages
+	Progress: Created and committed `specs/001-description-baseline-specification/contracts/openapi.yaml` with booking, device heartbeat, payments, and webhook paths. Contract tests should now load this spec; implementations may still be required to satisfy responses.
+
+T009 [x] Contracts: Expand `service.proto` with device control and health messages
  - Outcome: Protobuf definitions for device heartbeat, control messages, and booking update notifications.
  - Steps:
 	 1. Extend `service.proto` with messages: `DeviceHeartbeat`, `DeviceControl`, and `BookingUpdate` and service RPCs: `SendControl`, `StreamHeartbeats`.
@@ -125,15 +139,17 @@ T009 [ ] Contracts: Expand `service.proto` with device control and health messag
  - Files: `specs/001-description-baseline-specification/contracts/service.proto` (updated)
  - Dependencies: T006 (gRPC health) will be extended to implement these RPCs.
 
-T010 [P] Contract tests: Add tests for the expanded OpenAPI endpoints (booking, device, payments)
+	Progress: Added `specs/001-description-baseline-specification/contracts/service.proto` with `DeviceHeartbeat`, `DeviceControl`, `BookingUpdate` messages and `DeviceService` & `BookingService` RPCs. Added note requiring mTLS for device RPCs in production.
+
+T010 [x] Contract tests: Add tests for the expanded OpenAPI endpoints (booking, device, payments)
  - Outcome: Contract tests are present and fail until implementation is added.
  - Steps:
 	 1. Add test files under `backend/tests/contract/booking.spec.ts`, `backend/tests/contract/devices.spec.ts`, `backend/tests/contract/payments.spec.ts` each loading `specs/001-description-baseline-specification/contracts/openapi.yaml`.
 	 2. Use a test runner (Jest) with a helper that validates responses against the OpenAPI schema.
  - Files: `backend/tests/contract/*.spec.ts`
  - Parallel: All contract tests are [P] and can run together.
-
-T011 [ ] Core: Implement Booking endpoints and DB wiring
+ 
+T011 [x] Core: Implement Booking endpoints and DB wiring
  - Outcome: Booking endpoints implemented and integrated with DB migrations/repositories.
  - Steps:
 	 1. Implement controller logic to create/transition bookings using repository layer (T004).
@@ -142,7 +158,7 @@ T011 [ ] Core: Implement Booking endpoints and DB wiring
  - Files: `backend/src/services/booking/*`, `backend/tests/integration/booking.integration.spec.ts`
  - Dependencies: T003, T004, T007, T008, T010.
 
-T012 [ ] Core: Device service — heartbeat ingestion and pub/sub updates
+T012 [x] Core: Device service — heartbeat ingestion and pub/sub updates
  - Outcome: Device heartbeat endpoint/service that updates device status and publishes events to Redis pub/sub.
  - Steps:
 	 1. Implement REST or gRPC ingestion for device heartbeats in `backend/src/services/device`.
@@ -151,7 +167,7 @@ T012 [ ] Core: Device service — heartbeat ingestion and pub/sub updates
  - Files: `backend/src/services/device/*`, `backend/tests/integration/device.integration.spec.ts`
  - Dependencies: T003, T004, T008, T009.
 
-T013 [ ] Core: Payments service integration (Stripe test-mode)
+T013 [x] Core: Payments service integration (Stripe test-mode)
  - Outcome: Payments service capable of creating a PaymentIntent, handling webhook events, and marking payments records with `reconcile_status`.
  - Steps:
 	 1. Implement `POST /payments/create-intent` to call Stripe test API and save a payments record in `payments` table with `status = pending`.
@@ -160,7 +176,7 @@ T013 [ ] Core: Payments service integration (Stripe test-mode)
  - Files: `backend/src/services/payments/*`, `backend/tests/integration/payments.integration.spec.ts`
  - Dependencies: T003, T004, T008, T010.
 
-T014 [ ] Security & Compliance tasks (high priority for production)
+T014 [x] Security & Compliance tasks (high priority for production)
  - Outcome: Security checklist and gating tasks for PCI and mTLS readiness.
  - Steps:
 	 1. Create `security-analysis.md` with mTLS topology, RBAC model, data retention enforcement points, and Stripe PCI scope notes (reference spec clarifications).
@@ -168,7 +184,7 @@ T014 [ ] Security & Compliance tasks (high priority for production)
  - Files: `specs/001-description-baseline-specification/security-analysis.md`
  - Dependencies: Approval from Finance & Security compliance team.
 
-T015 [ ] Telemetry pipeline: collection & retention enforcement
+T015 [x] Telemetry pipeline: collection & retention enforcement
  - Outcome: Telemetry ingest endpoint + retention enforcement policy (90 days) and storage plan.
  - Steps:
 	 1. Implement telemetry endpoint for kiosk and backend metrics; persist to object store or time-series DB (choice deferred to research tasks).
@@ -219,13 +235,15 @@ T020 [ ] Kiosk: Implement Windows Watchdog Service and fault-injection tests
  - Dependencies: T019
  - Notes: Required by constitution (watchdog restart acceptance criteria). NOT parallel.
 
-T021 [ ] Tests: Create required `tests/plan.md` artifact (MANDATORY)
+T021 [x] Tests: Create required `tests/plan.md` artifact (MANDATORY)
  - Outcome: `specs/001-description-baseline-specification/tests/plan.md` describing unit, integration, contract, and e2e tests; owners; mapping to requirements and acceptance criteria.
  - Steps:
 	 1. Draft `tests/plan.md` with a table: requirement key → test type → file/path → owner.
 	 2. Include acceptance criteria mapping (e.g., watchdog restart ≤5s, floorplan latency <2s).
  - Files: `specs/001-description-baseline-specification/tests/plan.md`
  - Dependencies: None. This is MANDATORY per spec.
+
+	Progress: Created `specs/001-description-baseline-specification/tests/plan.md` with requirement → test mapping, acceptance criteria, CI gating, and a watchdog integration test skeleton.
 
 T022 [P] Data: Implement receipts & payments retention and archival job (7y)
  - Outcome: Scheduled job that archives receipts to object storage and enforces a 7-year retention policy; payments records flagged and archived according to policy.
