@@ -1,0 +1,4 @@
+{
+  "databaseUrl": "postgres://cafe_user:cafe_pass@localhost:5432/cafe_dev",
+  "migrationsDir": "./backend/migrations"
+}

@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Placeholder commit-msg hook — adapt for conventional commits if desired
+echo "commit-msg hook running"

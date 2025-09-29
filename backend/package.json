@@ -3,13 +3,36 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "echo \"no-op build\"",
-    "test": "echo \"no-op test\"",
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config jest.config.js --runInBand",
     "start": "node dist/index.js",
-    "lint": "echo \"no-op lint\"",
-    "migrate": "echo \"no-op migrate\""
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "lint": "eslint './src/**' --ext .ts",
+    "migrate": "node ./dist/migrations/run-migrations.js || echo 'migrate: implement migration runner'"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.5",
+    "@types/node": "^20.4.2",
+    "@types/pg": "^8.15.5",
+    "@types/supertest": "^6.0.3",
+    "eslint": "^8.46.0",
+    "jest": "^29.6.2",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.1.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.6"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.8.0",
+    "@grpc/proto-loader": "^0.7.5",
+    "@types/uuid": "^10.0.0",
+    "express": "^4.18.2",
+    "ioredis": "^5.8.0",
+    "pg": "^8.16.3",
+    "uuid": "^13.0.0"
   }
 }

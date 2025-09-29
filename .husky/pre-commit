@@ -1,0 +1,14 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Fast pre-commit: run linters only (adjust as CI expands)
+echo "Running linters (backend + frontend)..."
+npm --prefix backend run lint || {
+  echo "Backend lint failed";
+  exit 1;
+}
+npm --prefix frontend run lint || {
+  echo "Frontend lint failed";
+  exit 1;
+}
+echo "Linters passed"
