@@ -15,8 +15,7 @@ defaults:
   timeoutMinutes: 60
 
 notes:
-  - The Jenkinsfile at repo root defines stages: Checkout, Install, Lint, Unit Tests, Contract Tests,
-    Integration (docker-compose), Security Scan, and Publish.
+  - The Jenkinsfile at repo root defines stages: Checkout, Install, Lint, Unit Tests, Contract Tests, Integration (docker-compose), Security Scan, and Publish.
   - Contract tests are executed from `${BACKEND_DIR}/tests/contract` and may fail until implementation is complete.
   - The default `agentLabel` is `agent-1`. Ensure the Jenkins agent named `agent-1` is provisioned and online.
   - If tests or integration stages require building or running Docker containers, the agent must have Docker CLI
