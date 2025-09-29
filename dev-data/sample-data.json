@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2025-09-30T00:00:00.000Z",
+  "users": [
+    { "id": "user-1", "email": "user1@example.test", "name": "User 1", "createdAt": "2020-01-01T00:00:00.000Z" },
+    { "id": "user-2", "email": "user2@example.test", "name": "User 2", "createdAt": "2020-01-02T00:00:00.000Z" }
+  ],
+  "devices": [
+    { "id": "device-1", "type": "pos", "active": true },
+    { "id": "device-2", "type": "kiosk", "active": true }
+  ],
+  "payments": [
+    { "id": "pay-1", "userId": "user-1", "deviceId": "device-1", "amount": 4.5, "currency": "USD", "status": "completed", "createdAt": "2021-01-01T00:00:00.000Z" }
+  ]
+}

@@ -1,0 +1,26 @@
+roles:
+  - admin
+  - manager
+  - support
+  - operator
+
+policies:
+  - path: "/admin/*"
+    methods: [GET, POST, PUT, DELETE]
+    allow: [admin]
+
+  - path: "/devices/*"
+    methods: [GET, POST]
+    allow: [admin, manager, operator]
+
+  - path: "/payments/*"
+    methods: [POST]
+    allow: [admin, manager]
+
+  - path: "/support/*"
+    methods: [GET]
+    allow: [admin, manager, support]
+
+  - path: "/public/*"
+    methods: [GET]
+    allow: [admin, manager, support, operator]

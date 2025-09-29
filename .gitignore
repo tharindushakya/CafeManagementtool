@@ -1,4 +1,61 @@
-# Ignore GitHub folder that may contain workflows or secrets inserted by agents
+# Ignore node dependencies
+node_modules/
+**/node_modules/
+
+# Build / output
+dist/
+build/
+lib/
+frontend/dist/
+backend/dist/
+
+# Coverage and test output
+coverage/
+.nyc_output/
+jest-junit.xml
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.*
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Temp
+tmp/
+temp/
+
+# TypeScript
+*.tsbuildinfo
+
+# Docker
+docker-compose.override.yml
+
+# Dev certificates and keys (local/dev only)
+infra/certs/*.pem
+infra/certs/*.key
+infra/certs/*.pfx
+
+# Misc
+.cache/
+node_modules_cache/# Ignore GitHub folder that may contain workflows or secrets inserted by agents
 # Add or remove entries as appropriate for your project. Review before committing.
 .github/
 

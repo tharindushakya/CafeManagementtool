@@ -1,0 +1,11 @@
+{
+  "name": "watchdog",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "jest --runInBand"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}

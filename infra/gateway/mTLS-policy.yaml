@@ -1,0 +1,17 @@
+# Example gateway policy enforcing mTLS for sensitive endpoints (dev example)
+apiVersion: gateway/v1
+kind: MTLSPolicy
+metadata:
+  name: cafemanagement-mtls-policy
+spec:
+  enforcedPaths:
+    - path: /devices/*
+      methods: [GET, POST]
+      requireClientCert: true
+    - path: /payments/*
+      methods: [POST]
+      requireClientCert: true
+  caBundle: "infra/certs/dev/ca.crt" # path to dev CA bundle
+
+# Note: This is an illustrative policy file. Actual gateway providers (NGINX, Envoy, Azure APIM)
+# require provider-specific configuration. Use this YAML as documentation and a starting point.
