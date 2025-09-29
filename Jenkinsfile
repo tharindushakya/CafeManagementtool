@@ -66,37 +66,6 @@ pipeline {
     }
   }
 }
-pipeline {
-  agent any
-  stages {
-    stage('Info') {
-      steps {
-        echo "Running on ${env.NODE_NAME}"
-        // show basic environment
-        sh 'uname -a || true'
-        sh 'node --version || true'
-      }
-    }
-
-    stage('Install (backend)') {
-      steps {
-        dir('backend') {
-          sh 'npm ci || true'
-        }
-      }
-    }
-
-    stage('Unit tests (backend)') {
-      steps {
-        dir('backend') {
-          sh 'npm test --silent || true'
-        }
-      }
-    }
-  }
-  post {
-    always {
-      echo 'Minimal pipeline finished.'
-    }
-  }
-}
+// NOTE: removed an accidental duplicate top-level pipeline block.
+// Keep a single declarative pipeline above. If you want a short, separate
+// pipeline for quick checks, create a separate Jenkinsfile or job.
