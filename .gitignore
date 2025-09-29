@@ -48,4 +48,4 @@ docker-compose.override.yml
 
 # Local test DB and artifacts
 /tmp/
-
+.jar
