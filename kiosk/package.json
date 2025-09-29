@@ -1,0 +1,12 @@
+{
+  "name": "cafemanagement-kiosk",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "jest --runInBand"
+  },
+  "devDependencies": {
+    "jest": "^29.6.2"
+  }
+}
