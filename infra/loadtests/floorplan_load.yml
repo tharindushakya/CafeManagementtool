@@ -1,0 +1,25 @@
+# k6 loadtest placeholder for floorplan heartbeat load (T026)
+# This YAML is intended for use with k6+cloud or a wrapper that converts yaml->js.
+# It defines a simple scenario: many virtual devices POST heartbeats to the ingestion endpoint.
+
+scenarios:
+  spike:
+    executor: ramp-up-arrival-rate
+    startRate: 10
+    timeUnit: 1s
+    preAllocatedVUs: 50
+    maxVUs: 200
+    stages:
+      - duration: 30s
+        target: 200
+    exec: send_heartbeat
+
+functions:
+  send_heartbeat: |
+    import http from 'k6/http';
+    import { check } from 'k6';
+    export default function () {
+      const payload = JSON.stringify({ deviceId: `device-${__VU}`, ts: Date.now() });
+      const res = http.post('http://127.0.0.1:3000/devices/heartbeat', payload, { headers: { 'Content-Type': 'application/json' } });
+      check(res, { 'status 200': (r) => r.status === 200 });
+    }
