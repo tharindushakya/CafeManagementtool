@@ -6,7 +6,7 @@ pipelineJob('CafeManagementTool-baseline') {
       scm {
         git {
           remote { url('https://github.com/tharindushakya/CafeManagementtool.git') }
-          branches { branch('*/main') }
+          branches { branch('*/master') }
         }
       }
       scriptPath('Jenkinsfile')
