@@ -192,7 +192,7 @@ T015 [x] Telemetry pipeline: collection & retention enforcement
  - Files: `backend/src/services/telemetry/*`, `infra/telemetry-retention-job`.
  - Dependencies: T006 (kiosk), T012 (device heartbeats).
 
-T016 [P] Testing infra: Jenkins pipeline skeleton and test runners
+T016 [x] Testing infra: Jenkins pipeline skeleton and test runners
  - Outcome: Jenkinsfile (or pipeline-as-code) that runs lint, unit tests, contract tests, and integration smoke tests.
  - Steps:
 	 1. Add `Jenkinsfile` at repo root with stages: Checkout, Install, Lint, Unit Tests, Contract Tests, Integration (docker-compose up + smoke tests), Security Scan, Publish artifacts.
