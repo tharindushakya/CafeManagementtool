@@ -1,3 +1,283 @@
+openapi: 3.0.0
+info:
+  title: Gaming Café Management API (baseline)
+  version: '0.1.0'
+  description: |-
+    Minimal OpenAPI specification for the Gaming Café Management baseline feature set.
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+paths:
+  /bookings:
+    post:
+      summary: Create a new booking (idempotent)
+      operationId: createBooking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreateRequest'
+      responses:
+        '201':
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: List bookings (filter by venue or user)
+      operationId: listBookings
+      parameters:
+        - name: venue_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: user_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Array of bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+  /bookings/{id}/start:
+    post:
+      summary: Mark a booking as started
+      operationId: startBooking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /bookings/{id}/complete:
+    post:
+      summary: Mark a booking as completed
+      operationId: completeBooking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /devices/{id}/heartbeat:
+    post:
+      summary: Device heartbeat ingestion (updates status)
+      operationId: deviceHeartbeat
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceHeartbeat'
+      responses:
+        '200':
+          description: Heartbeat received
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /payments/create-intent:
+    post:
+      summary: Create a Stripe PaymentIntent (test-mode)
+      operationId: createPaymentIntent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreateRequest'
+      responses:
+        '200':
+          description: PaymentIntent created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntentResponse'
+        '402':
+          description: Payment required / Stripe error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /webhooks/stripe:
+    post:
+      summary: Stripe webhook receiver (events)
+      operationId: stripeWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Event received
+        '400':
+          description: Invalid event signature or payload
+components:
+  schemas:
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        venue_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [reserved, active, completed, cancelled]
+        created_at:
+          type: string
+          format: date-time
+    BookingCreateRequest:
+      type: object
+      required: [venue_id, user_id, start_time, duration_minutes]
+      properties:
+        venue_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        start_time:
+          type: string
+          format: date-time
+        duration_minutes:
+          type: integer
+          minimum: 1
+    BookingResponse:
+      type: object
+      properties:
+        booking:
+          $ref: '#/components/schemas/Booking'
+    DeviceHeartbeat:
+      type: object
+      required: [device_id, venue_id, status, last_heartbeat]
+      properties:
+        device_id:
+          type: string
+          format: uuid
+        venue_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [ok, warning, offline]
+        last_heartbeat:
+          type: string
+          format: date-time
+    PaymentCreateRequest:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: integer
+          description: Amount in smallest currency unit (e.g., cents)
+          minimum: 0
+        currency:
+          type: string
+          example: USD
+        booking_id:
+          type: string
+          format: uuid
+        payment_method_types:
+          type: array
+          items:
+            type: string
+          default: [card]
+    PaymentIntentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        client_secret:
+          type: string
+        status:
+          type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 openapi: 3.0.3
 info:
   title: CafeManagementtool API (baseline)

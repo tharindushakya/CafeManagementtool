@@ -1,4 +1,46 @@
 syntax = "proto3";
+
+package cafe;
+
+option go_package = "cafe/proto";
+
+// Protobuf definitions for device control and health messages.
+// NOTE: Device RPCs MUST be protected by mTLS in production.
+
+message DeviceHeartbeat {
+  string device_id = 1;
+  string venue_id = 2;
+  string status = 3; // ok, warning, offline
+  int64 last_heartbeat_ms = 4;
+}
+
+message DeviceControl {
+  string device_id = 1;
+  string command = 2;
+  map<string, string> params = 3;
+}
+
+message BookingUpdate {
+  string booking_id = 1;
+  string status = 2; // reserved, active, completed, cancelled
+  string updated_at = 3;
+}
+
+message Empty {}
+
+service DeviceService {
+  // Stream heartbeats from devices (server-side streaming)
+  rpc StreamHeartbeats(Empty) returns (stream DeviceHeartbeat) {}
+
+  // Send a control message to a device
+  rpc SendControl(DeviceControl) returns (Empty) {}
+}
+
+service BookingService {
+  // Notify other services about booking updates
+  rpc NotifyBookingUpdate(BookingUpdate) returns (Empty) {}
+}
+syntax = "proto3";
 package cafemgmt;
 
 service Health {
